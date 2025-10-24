@@ -4,7 +4,9 @@ import {
   loginUserApi,
   logoutApi,
   getUserApi,
-  updateUserApi
+  updateUserApi,
+  TRegisterData,
+  TLoginData
 } from '../../utils/burger-api';
 import { TUser } from '@utils-types';
 import { setCookie, deleteCookie } from '../../utils/cookie';
@@ -23,11 +25,53 @@ const initialUserState: UserData = {
 
 export const performRegistration = createAsyncThunk(
   'user/performRegistration',
-  registerUserApi
+  async (data: TRegisterData) => {
+    const response = await registerUserApi(data);
+    setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    return response;
+  }
 );
-export const performLogin = createAsyncThunk('user/performLogin', loginUserApi);
-export const performLogout = createAsyncThunk('user/performLogout', logoutApi);
-export const fetchUserData = createAsyncThunk('user/fetchUserData', getUserApi);
+
+export const performLogin = createAsyncThunk(
+  'user/performLogin',
+  async (data: TLoginData) => {
+    const response = await loginUserApi(data);
+    setCookie('accessToken', response.accessToken);
+    localStorage.setItem('refreshToken', response.refreshToken);
+    return response;
+  }
+);
+
+export const performLogout = createAsyncThunk(
+  'user/performLogout',
+  async (_, { rejectWithValue }) => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      deleteCookie('accessToken');
+      localStorage.removeItem('refreshToken');
+      return rejectWithValue(error);
+    }
+    deleteCookie('accessToken');
+    localStorage.removeItem('refreshToken');
+  }
+);
+
+export const fetchUserData = createAsyncThunk(
+  'user/fetchUserData',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await getUserApi();
+      return response;
+    } catch (error) {
+      deleteCookie('accessToken');
+      localStorage.removeItem('refreshToken');
+      return rejectWithValue(error);
+    }
+  }
+);
+
 export const saveUserData = createAsyncThunk(
   'user/saveUserData',
   updateUserApi
@@ -44,8 +88,6 @@ const userSlice = createSlice({
       })
       .addCase(performRegistration.fulfilled, (state, action) => {
         state.user = action.payload.user;
-        setCookie('accessToken', action.payload.accessToken);
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
         state.authResolved = true;
       })
       .addCase(performRegistration.rejected, (state, action) => {
@@ -58,8 +100,6 @@ const userSlice = createSlice({
       })
       .addCase(performLogin.fulfilled, (state, action) => {
         state.user = action.payload.user;
-        setCookie('accessToken', action.payload.accessToken);
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
         state.authResolved = true;
       })
       .addCase(performLogin.rejected, (state, action) => {
@@ -69,14 +109,10 @@ const userSlice = createSlice({
 
       .addCase(performLogout.fulfilled, (state) => {
         state.user = null;
-        deleteCookie('accessToken');
-        localStorage.removeItem('refreshToken');
         state.authResolved = true;
       })
       .addCase(performLogout.rejected, (state, action) => {
         state.error = action.error.message || 'Ошибка выхода';
-        deleteCookie('accessToken');
-        localStorage.removeItem('refreshToken');
         state.user = null;
         state.authResolved = true;
       })
@@ -89,8 +125,6 @@ const userSlice = createSlice({
         state.error = action.error.message || 'Ошибка проверки при авторизации';
         state.authResolved = true;
         state.user = null;
-        deleteCookie('accessToken');
-        localStorage.removeItem('refreshToken');
       })
 
       .addCase(saveUserData.fulfilled, (state, action) => {

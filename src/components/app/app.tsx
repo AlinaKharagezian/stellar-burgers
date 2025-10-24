@@ -36,6 +36,23 @@ const App = () => {
     navigate(-1);
   };
 
+  /*   в макете вроде бы вместо названия модального окна
+    был номер заказа, так и попыталась сделать */
+  let modalTitle = '';
+  const pathParts = location.pathname.split('/');
+  const lastPart = pathParts[pathParts.length - 1];
+
+  if (
+    location.pathname.startsWith('/feed/') ||
+    location.pathname.startsWith('/profile/orders/')
+  ) {
+    if (!isNaN(parseInt(lastPart))) {
+      modalTitle = `#${String(lastPart).padStart(6, '0')}`;
+    }
+  } else if (location.pathname.startsWith('/ingredients/')) {
+    modalTitle = 'Детали ингредиента';
+  }
+
   return (
     <div className={styles.app}>
       <AppHeader />
@@ -111,7 +128,7 @@ const App = () => {
             <Route
               path='/ingredients/:id'
               element={
-                <Modal title='Детали ингредиента' onClose={closeModal}>
+                <Modal title={modalTitle} onClose={closeModal}>
                   <IngredientDetails />
                 </Modal>
               }
@@ -119,7 +136,7 @@ const App = () => {
             <Route
               path='/feed/:number'
               element={
-                <Modal title='Информация о заказе' onClose={closeModal}>
+                <Modal title={modalTitle} onClose={closeModal}>
                   <OrderInfo />
                 </Modal>
               }
@@ -128,7 +145,7 @@ const App = () => {
               path='/profile/orders/:number'
               element={
                 <ProtectedRoute>
-                  <Modal title='Информация о заказе' onClose={closeModal}>
+                  <Modal title={modalTitle} onClose={closeModal}>
                     <OrderInfo />
                   </Modal>
                 </ProtectedRoute>
