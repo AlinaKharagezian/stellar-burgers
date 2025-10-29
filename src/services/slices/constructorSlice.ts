@@ -12,7 +12,7 @@ interface ConstructorState {
   ingredients: TConstructorIngredient[];
 }
 
-const initialConsructorState: ConstructorState = {
+export const initialConsructorState: ConstructorState = {
   bun: null,
   ingredients: []
 };
