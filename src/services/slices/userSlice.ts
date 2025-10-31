@@ -17,7 +17,7 @@ interface UserData {
   error: string | null;
 }
 
-const initialUserState: UserData = {
+export const initialUserState: UserData = {
   user: null,
   authResolved: false,
   error: null

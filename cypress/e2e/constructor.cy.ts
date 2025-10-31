@@ -2,8 +2,12 @@ describe('Тестирование страницы конструктора б�
 
     const BUN_NAME = 'Краторная булка N-200i';
     const MAIN_NAME = 'Биокотлета из марсианской Магнолии';
-    const MODAL_MAIN_NAME = 'Мясо бессмертных моллюсков Protostomia';
     const ORDER_NUMBER = 92532;
+    const MODAL_MAIN_NAME = 'Мясо бессмертных моллюсков Protostomia';
+    const MODAL_MAIN_CALORIES = '420';
+    const MODAL_MAIN_PROTEINS = '433';
+    const MODAL_MAIN_FAT = '244';
+    const MODAL_MAIN_CARBOHYDRATES = '33';
 
     const SELECTOR = {
         INGREDIENT_CARD: '[data-cy="ingredient-card"]',
@@ -16,7 +20,12 @@ describe('Тестирование страницы конструктора б�
         ADD_BUTTON: 'button:contains("Добавить")',
         BUN_TOP: '[data-cy="constructor-bun-top"]',
         BUN_BOTTOM: '[data-cy="constructor-bun-bottom"]',
-        INGREDIENT_ITEM: '[data-cy="constructor-ingredient-item"]'
+        INGREDIENT_ITEM: '[data-cy="constructor-ingredient-item"]',
+        MODAL_NAME: '[data-cy="modal-ingredient-name"]',
+        MODAL_CALORIES: '[data-cy="modal-ingredient-calories"]',
+        MODAL_PROTEINS: '[data-cy="modal-ingredient-proteins"]',
+        MODAL_FAT: '[data-cy="modal-ingredient-fat"]',
+        MODAL_CARBOHYDRATES: '[data-cy="modal-ingredient-carbohydrates"]'
     };
 
     beforeEach(() => {
@@ -31,10 +40,24 @@ describe('Тестирование страницы конструктора б�
         cy.wait(['@getIngredients', '@getUser']);
     });
 
+    afterEach(() => {
+        cy.clearCookie('accessToken');
+        cy.clearLocalStorage('refreshToken');
+    });
+
     it('должен открывать и закрывать модальное окно ингредиента', () => {
         cy.contains(MODAL_MAIN_NAME).closest(SELECTOR.INGREDIENT_CARD).click();
         const modal = cy.get(SELECTOR.MODAL);
         modal.should('be.visible');
+
+        cy.get(SELECTOR.MODAL).should('be.visible').within(() => {
+            cy.get(SELECTOR.MODAL_NAME).should('have.text', MODAL_MAIN_NAME);
+            cy.get(SELECTOR.MODAL_CALORIES).should('have.text', MODAL_MAIN_CALORIES);
+            cy.get(SELECTOR.MODAL_PROTEINS).should('have.text', MODAL_MAIN_PROTEINS);
+            cy.get(SELECTOR.MODAL_FAT).should('have.text', MODAL_MAIN_FAT);
+            cy.get(SELECTOR.MODAL_CARBOHYDRATES).should('have.text', MODAL_MAIN_CARBOHYDRATES);
+        });
+
         cy.get(SELECTOR.MODAL_CLOSE).click();
         modal.should('not.exist');
 
