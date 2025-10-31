@@ -18,7 +18,7 @@ interface OrdersState {
   totalToday: number;
 }
 
-const initialOrdersState: OrdersState = {
+export const initialOrdersState: OrdersState = {
   feeds: [],
   userOrders: [],
   orderRequest: false,
